@@ -3,17 +3,17 @@ package CarnivalDerby;
 import java.awt.image.*;
 import javax.swing.*;
 
-public class Car extends JLabel
+public class Car extends ImageIcon
 {
 	private int x,
 				y;
 	public final static int WIDTH = 150,
 							 HEIGHT = 75;
-	private BufferedImage image;
+	private String file;
 	
-	public Car(BufferedImage i, int yStart)
+	public Car(String i, int yStart)
 	{
-		super(new ImageIcon(i));
+		super(i);
 		setclass(yStart);
 	} // constructor end
 	
@@ -28,7 +28,7 @@ public class Car extends JLabel
 		y = yStart;
 	} // y set method end
 	
-	private void setX(int xStart) // x set methos start
+	private void setX(int xStart) // x set method start
 	{
 		x = xStart;
 	} // x set method end
@@ -43,8 +43,8 @@ public class Car extends JLabel
 		return x;
 	} // x get method end
 	
-	public void increaseY(int num) // increaseY method start
+	public void move(int num) // increaseY method start
 	{
 		x += num;
 	} // increaseY method end
-}
+} // Car class end

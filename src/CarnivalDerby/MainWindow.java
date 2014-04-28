@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.*;
 import java.awt.event.*;
 
 import javax.imageio.*;
@@ -29,32 +30,19 @@ public class MainWindow extends JFrame // MainWindow class start
 					  learnToPlay,
 					  about;
 	private JMenuBar bar;
-	private JButton start;
+	private JButton start,
+					lineUp;
 	private JTextField wager,
 					   total;
 	private JLabel wagerLabel,
 				   totalLabel,
 				   finishLineLabel;
-	private Car car1Label,
-	   			car2Label,
-	   			car3Label,
-	   			car4Label,
-	   			car5Label;
 	private JComboBox carBox;
-	private BufferedImage car1,
-						  car2,
-						  car3,
-						  car4,
-						  car5,
-						  finishLine;
+	private Car[] cars = new Car[5];
+	private BufferedImage finishLine;
 	private static final String[] comboBoxArray = {"Select a car", "Car 1", "Car 2", "Car 3", "Car 4", "Car 5"};
-	private int car1x,
-				car2x,
-				car3x,
-				car4x,
-				car5x;
 	private static final int WIN = 750,
-							 DELAY = 3;
+							 DELAY = 25;
 	private static Random ranNum = new Random();
 	private boolean won;
 	
@@ -158,11 +146,11 @@ public class MainWindow extends JFrame // MainWindow class start
 		gamePanel = new JPanel();
 		try
 		{
-			car1 = ImageIO.read(new File("Car1.jpg"));
-			car2 = ImageIO.read(new File("Car2.jpg"));
-			car3 = ImageIO.read(new File("Car3.jpg"));
-			car4 = ImageIO.read(new File("Car4.jpg"));
-			car5 = ImageIO.read(new File("Car5.jpg"));
+			cars[0] = new Car("Car1.jpg", 120);
+			cars[1] = new Car("Car2.jpg", 240);
+			cars[2] = new Car("Car3.jpg", 360);
+			cars[3] = new Car("Car4.jpg", 480);
+			cars[4] = new Car("Car5.jpg", 600);
 			finishLine = ImageIO.read(new File("FinishLine.jpg"));
 		} // end try
 		catch (IOException e)
@@ -170,44 +158,43 @@ public class MainWindow extends JFrame // MainWindow class start
 			JOptionPane.showMessageDialog(gamePanel, "Error opening image file(s).", "File Error",
 					JOptionPane.ERROR_MESSAGE);
 		} // end catch
-		car1Label = new Car(car1, 20);
-		car2Label = new Car(car2, 140);
-		car3Label = new Car(car3, 260);
-		car4Label = new Car(car4, 380);
-		car5Label = new Car(car5, 500);
 		finishLineLabel = new JLabel(new ImageIcon(finishLine));
-		car1x = car2x = car3x = car4x = car5x = 20;
 		
 		// component properties
 		gamePanel.setBackground(Color.WHITE);
 		gamePanel.setLayout(null);
-		car1Label.setBounds(car1Label.getX(), car1Label.getY(), Car.WIDTH, Car.HEIGHT);
-		car2Label.setBounds(car2Label.getX(), car2Label.getY(), Car.WIDTH, Car.HEIGHT);
-		car3Label.setBounds(car3Label.getX(), car3Label.getY(), Car.WIDTH, Car.HEIGHT);
-		car4Label.setBounds(car4Label.getX(), car4Label.getY(), Car.WIDTH, Car.HEIGHT);
-		car5Label.setBounds(car5Label.getX(), car5Label.getY(), Car.WIDTH, Car.HEIGHT);
 		finishLineLabel.setBounds(900, 20, 40, 600);
 		
 		// adding components to panel
-		gamePanel.add(car1Label);
-		gamePanel.add(car2Label);
-		gamePanel.add(car3Label);
-		gamePanel.add(car4Label);
-		gamePanel.add(car5Label);
 		gamePanel.add(finishLineLabel);
 	} // buildGamePanel method end
 	
 	// race method makes the cars move at random intervals
-	private void race(Car label) throws InterruptedException // race method start
+	private void race(Car car) throws InterruptedException // race method start
 	{
-		int increase = ranNum.nextInt(5);
-		label.increaseY(increase);;
-		car1Label.setBounds(label.getX(), label.getY(), Car.WIDTH, Car.HEIGHT);
-		if (label.getY() > WIN)
+		while (!won)
 		{
-			won = true;
-		} // end if
+			int increase = ranNum.nextInt(5);
+			car.move(increase);
+			repaint();
+			if (car.getX() > WIN)
+			{
+				won = true;
+			} // end if
+			Thread.sleep(DELAY);
+		} // end while
 	} // race method end
+	
+	public void paint(Graphics g) // paint method start
+	{
+		super.paint(g);
+		
+		Graphics2D g2d = (Graphics2D)g;
+		for (int x = 0; x < cars.length; x++)
+		{
+			g.drawImage(cars[x].getImage(), cars[x].getX(), cars[x].getY(), gamePanel);
+		} // end for
+	} // paintComponent method end
 	
 	class StartHandler implements ActionListener // StartHandler class start
 	{
@@ -235,19 +222,57 @@ public class MainWindow extends JFrame // MainWindow class start
 				{
 					start.setEnabled(false);
 					won = false;
-					while (!won)
-					{
-						try
+					SwingWorker<Void, Object> car1Worker = new SwingWorker<Void, Object>()
+					{ // start anonymous inner class
+						@Override
+						protected Void doInBackground() throws Exception // doInBackground method start
 						{
-							race();
-							Thread.sleep(DELAY);
-						} // end try
-						catch (InterruptedException e)
+							race(cars[0]);
+							return null;
+						} // doInBackground method end
+					}; // end anonymous inner class
+					SwingWorker<Void, Object> car2Worker = new SwingWorker<Void, Object>()
+					{ // start anonymous inner class
+						@Override
+						protected Void doInBackground() throws Exception // doInBackground method start
 						{
-							e.printStackTrace();
-						} // end catch
-					}
-					start.setEnabled(true);
+							race(cars[1]);
+							return null;
+						} // doInBackground method end
+					}; // end anonymous inner class
+					SwingWorker<Void, Object> car3Worker = new SwingWorker<Void, Object>()
+					{ // start anonymous inner class
+						@Override
+						protected Void doInBackground() throws Exception // doInBackground method start
+						{
+							race(cars[2]);
+							return null;
+						} // doInBackground method end
+					}; // end anonymous inner class
+					SwingWorker<Void, Object> car4Worker = new SwingWorker<Void, Object>()
+					{ // start anonymous inner class
+						@Override
+						protected Void doInBackground() throws Exception // doInBackground method start
+						{
+							race(cars[3]);
+							return null;
+						} // doInBackground method end
+					}; // end anonymous inner class
+					SwingWorker<Void, Object> car5Worker = new SwingWorker<Void, Object>()
+					{ // start anonymous inner class
+						@Override
+						protected Void doInBackground() throws Exception // doInBackground method start
+						{
+							race(cars[4]);
+							return null;
+						} // doInBackground method end
+					}; // end anonymous inner class
+					Executor executor = Executors.newCachedThreadPool();
+					executor.execute(car1Worker);
+					executor.execute(car2Worker);
+					executor.execute(car3Worker);
+					executor.execute(car4Worker);
+					executor.execute(car5Worker);
 				} // end else if
 			} // end try
 			catch (NumberFormatException exception)
