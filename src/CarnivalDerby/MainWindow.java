@@ -34,12 +34,12 @@ public class MainWindow extends JFrame // MainWindow class start
 					   total;
 	private JLabel wagerLabel,
 				   totalLabel,
-				   car1Label,
-				   car2Label,
-				   car3Label,
-				   car4Label,
-				   car5Label,
 				   finishLineLabel;
+	private Car car1Label,
+	   			car2Label,
+	   			car3Label,
+	   			car4Label,
+	   			car5Label;
 	private JComboBox carBox;
 	private BufferedImage car1,
 						  car2,
@@ -170,22 +170,22 @@ public class MainWindow extends JFrame // MainWindow class start
 			JOptionPane.showMessageDialog(gamePanel, "Error opening image file(s).", "File Error",
 					JOptionPane.ERROR_MESSAGE);
 		} // end catch
-		car1Label = new JLabel(new ImageIcon(car1));
-		car2Label = new JLabel(new ImageIcon(car2));
-		car3Label = new JLabel(new ImageIcon(car3));
-		car4Label = new JLabel(new ImageIcon(car4));
-		car5Label = new JLabel(new ImageIcon(car5));
+		car1Label = new Car(car1, 20);
+		car2Label = new Car(car2, 140);
+		car3Label = new Car(car3, 260);
+		car4Label = new Car(car4, 380);
+		car5Label = new Car(car5, 500);
 		finishLineLabel = new JLabel(new ImageIcon(finishLine));
 		car1x = car2x = car3x = car4x = car5x = 20;
 		
 		// component properties
 		gamePanel.setBackground(Color.WHITE);
 		gamePanel.setLayout(null);
-		car1Label.setBounds(car1x, 20, 150, 75);
-		car2Label.setBounds(car2x, 140, 150, 75);
-		car3Label.setBounds(car3x, 260, 150, 75);
-		car4Label.setBounds(car4x, 380, 150, 75);
-		car5Label.setBounds(car5x, 500, 150, 75);
+		car1Label.setBounds(car1Label.getX(), car1Label.getY(), Car.WIDTH, Car.HEIGHT);
+		car2Label.setBounds(car2Label.getX(), car2Label.getY(), Car.WIDTH, Car.HEIGHT);
+		car3Label.setBounds(car3Label.getX(), car3Label.getY(), Car.WIDTH, Car.HEIGHT);
+		car4Label.setBounds(car4Label.getX(), car4Label.getY(), Car.WIDTH, Car.HEIGHT);
+		car5Label.setBounds(car5Label.getX(), car5Label.getY(), Car.WIDTH, Car.HEIGHT);
 		finishLineLabel.setBounds(900, 20, 40, 600);
 		
 		// adding components to panel
@@ -198,12 +198,12 @@ public class MainWindow extends JFrame // MainWindow class start
 	} // buildGamePanel method end
 	
 	// race method makes the cars move at random intervals
-	private void race() throws InterruptedException // race method start
+	private void race(Car label) throws InterruptedException // race method start
 	{
 		int increase = ranNum.nextInt(5);
-		car1x += increase;
-		car1Label.setBounds(car1x, 20, 150, 75);
-		if (car1x > WIN)
+		label.increaseY(increase);;
+		car1Label.setBounds(label.getX(), label.getY(), Car.WIDTH, Car.HEIGHT);
+		if (label.getY() > WIN)
 		{
 			won = true;
 		} // end if
