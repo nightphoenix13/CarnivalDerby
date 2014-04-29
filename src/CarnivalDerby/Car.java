@@ -28,7 +28,7 @@ public class Car extends ImageIcon
 		y = yStart;
 	} // y set method end
 	
-	private void setX(int xStart) // x set method start
+	public void setX(int xStart) // x set method start
 	{
 		x = xStart;
 	} // x set method end
